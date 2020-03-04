@@ -161,7 +161,7 @@ class PoleServer_handler implements Runnable {
       System.out.println("This is the angledot >>>>>> " + angleDot + "\n");
       System.out.println("This is the pos >>>>>> " + pos + "\n");
       System.out.println("This is the posDot >>>>>> " + posDot + "\n");
-      double kpos = -0.0275;
+      /*double kpos = -0.0275;
       double kposdot = 0.8931;
       double kangle = -0.0138;
       double kangledot = 0.4487;
@@ -173,8 +173,25 @@ class PoleServer_handler implements Runnable {
            action = -1 * action;
        } else if ((action < 0) && (angle > 0)) {
            action = -1 * action;
-       }
-       
+       }*/
+      if(posDot + angleDot + angle == 0){
+  		return action;
+       } else if ((angle == 0  && angleDot > 0) || (angle == 0 && angleDot < 0)){
+  		return posDot;
+       } else if ( angle < 0 && angleDot < 0) {
+ 		// Move to the left sin() * 9.8
+    		action = (Math.sin(angle) * 9.8);
+	} else if ( angle < 0 && angleDot > 0) {
+		 // Move to the right sin() * 9.8
+    		action = (Math.sin(angle) * 4.9);
+	} else if ( angle > 0 && angleDot > 0) {
+ 		// Move to the right sin() * 9.8
+    		action = (1 * Math.sin(angle) * 9.8);
+	} else if ( angle > 0 && angleDot < 0) {
+ 		// Move to the left sin() * 9.8
+    		action = (Math.sin(angle) * 4.9);
+	}
+       System.out.println("Action is ----- " + action + "\n");
        return action;
    }
 

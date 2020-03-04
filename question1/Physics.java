@@ -106,7 +106,7 @@ public class Physics implements Runnable {
       // Update the state of the pole;
       // First calc derivatives of state variables
       synchronized(p) {
-        System.out.println("Pendulum["+p.get_id()+"]: applied action = " + p.get_action());
+        // System.out.println("Pendulum["+p.get_id()+"]: applied action = " + p.get_action());
         double force = p.forceMag * p.get_action();
         double sinangle = Math.sin(p.get_angle());
         double cosangle = Math.cos(p.get_angle());

@@ -148,6 +148,12 @@ class PoleServer_handler implements Runnable {
     }
   
     double sum = 0.0;
+    double largeAngle = 0.0;
+    double largeAngleDot = 0.0;
+    double minAngle = 0.0;
+    double minAngleDot = 0.0;
+    double largePosDot = 0.0;
+    double minPosDot = 0.0;
 
     // Calculate the actions to be applied to the inverted pendulum from the
     // sensing data.
@@ -161,7 +167,7 @@ class PoleServer_handler implements Runnable {
       System.out.println("This is the angledot >>>>>> " + angleDot + "\n");
       System.out.println("This is the pos >>>>>> " + pos + "\n");
       System.out.println("This is the posDot >>>>>> " + posDot + "\n");
-      double kpos = -0.0275;
+      /*double kpos = -0.0275;
       double kposdot = 0.8931;
       double kangle = -0.0138;
       double kangledot = 0.4487;
@@ -173,9 +179,62 @@ class PoleServer_handler implements Runnable {
            action = -1 * action;
        } else if ((action < 0) && (angle > 0)) {
            action = -1 * action;
-       }
-       
+       }*/
+      while ( pos != 2.0 ) {
+	      if ((angle <= .000078) && (angle >= -.000071)){
+		      if((angleDot <= .001) && (angleDot >= -.001)){
+			      System.out.println("Am I touched?\n");
+			      action = .075;
+		      }
+	      } else {
+      			if(posDot + angleDot + angle == 0){
+  				return action;
+       			} else if ((angle == 0  && angleDot > 0) || (angle == 0 && angleDot < 0)){
+  				return posDot;
+       			} else if ( angle < 0 && angleDot < 0) {
+ 				// Move to the left sin() * 9.8
+    				action = (Math.sin(angle) * 9.8);
+			} else if ( angle < 0 && angleDot > 0) {
+		 		// Move to the right sin() * 9.8
+    				action = (Math.sin(angle) * 4.9);
+			} else if ( angle > 0 && angleDot > 0) {
+ 				// Move to the right sin() * 9.8
+    				action = (1 * Math.sin(angle) * 9.8);
+			} else if ( angle > 0 && angleDot < 0) {
+ 				// Move to the left sin() * 9.8
+    				action = (Math.sin(angle) * 4.9);
+			}
+       			if ( pos < -1.2) {
+	       			if (angle > largeAngle) {
+		       		largeAngle = angle;
+	       		}
+	       		if (angle < minAngle ) {
+		       		minAngle = angle;
+	       		}
+	       		if ( posDot < largePosDot ) {
+		       		largePosDot = posDot;
+	       		}
+	       		if ( posDot < minPosDot ) {
+		       		minPosDot = posDot;
+	       		}
+	       		if ( angleDot > largeAngleDot ) {
+		       		largeAngleDot = angleDot;
+	       		}
+	       		if ( angleDot < minAngleDot ) {
+		       		minAngleDot = angleDot;
+	       		}
+			}
+       	}
+       System.out.println("largeAngle is ----- " + largeAngle + "\n");
+       System.out.println("minAngle is ----- " + minAngle + "\n");
+       System.out.println("largePosDot is ----- " + largePosDot + "\n");
+       System.out.println("minPosDot is ----- " + minPosDot + "\n");
+       System.out.println("minAngleDot is ----- " + minAngleDot + "\n");
+       System.out.println("largeAngleDot is ----- " + largeAngleDot + "\n");
        return action;
+      }
+       return action;
+       
    }
 
     /**

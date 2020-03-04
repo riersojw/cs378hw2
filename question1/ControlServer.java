@@ -148,8 +148,9 @@ class PoleServer_handler implements Runnable {
     }
   
     double kp = 1.00, ki = 0.01, kd = 0.2;
-    PID pid = new PID(kp, ki, kd);
-    double sum = 0.0;
+    PID anglePid = new PID(kp, ki, kd);
+
+    PID posPid = new PID(0.05, 0.0005, 0.07);
 
     // Calculate the actions to be applied to the inverted pendulum from the
     // sensing data.
@@ -158,14 +159,12 @@ class PoleServer_handler implements Runnable {
     // pendulum needs sensing data from other pendulums.
     double calculate_action(double angle, double angleDot, double pos, double posDot) {
         double action = 0;
-        double degree = (angle) * (180 / Math.PI);
-        // System.out.println("This is the angle >>>>>> " + degree + "\n");
-        // System.out.println("This is the angledot >>>>>> " + angleDot + "\n");
-        // System.out.println("This is the pos >>>>>> " + pos + "\n");
-        // System.out.println("This is the posDot >>>>>> " + posDot + "\n");
 
-        pid.step(angle, angleDot);
-        action = pid.calculate();
+        anglePid.step(angle, angleDot);
+        action = anglePid.calculate();
+
+        posPid.step(pos, posDot);
+        action += posPid.calculate();
 
         System.out.println("Action is ----- " + action + "\n");
         return action;

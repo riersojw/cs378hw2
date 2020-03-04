@@ -60,7 +60,7 @@ class Sensor implements Runnable {
             }
 
             sendMessage_doubleArray(sensorData);
-            // System.out.println("---------------");
+            System.out.println("---------------");
 
             try {
                 Thread.sleep(samplingPeriod_phy_ms);
@@ -79,11 +79,11 @@ class Sensor implements Runnable {
             out.writeObject(data);
             out.flush();
 
-            // System.out.print("client> ");
+            System.out.print("client> ");
             for(int i=0; i< data.length; i++){
-                // System.out.print(data[i] + "  ");
+                System.out.print(data[i] + "  ");
             }
-            // System.out.println();
+            System.out.println();
 
         } catch (IOException ioException) {
             ioException.printStackTrace();

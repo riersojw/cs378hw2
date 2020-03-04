@@ -19,7 +19,7 @@ public class Physics implements Runnable {
     // Set the number of poles
     public final int NUM_POLES = 1;
     // Set the initial position of the poles
-    public final double[] pole_init_pos = {-1.0};
+    public final double[] pole_init_pos = {-2.0};
 
     public Physics(double tau_sim, double tau_phy) {
         this.tau_sim = tau_sim;
@@ -106,7 +106,7 @@ public class Physics implements Runnable {
       // Update the state of the pole;
       // First calc derivatives of state variables
       synchronized(p) {
-        System.out.println("Pendulum["+p.get_id()+"]: applied action = " + p.get_action());
+        // System.out.println("Pendulum["+p.get_id()+"]: applied action = " + p.get_action());
         double force = p.forceMag * p.get_action();
         double sinangle = Math.sin(p.get_angle());
         double cosangle = Math.cos(p.get_angle());

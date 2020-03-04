@@ -30,7 +30,7 @@ class Actuator implements Runnable {
               assert(data.length == physics.NUM_POLES);
               physics.update_actions(data);
             } catch (Exception e) {
-                // e.printStackTrace();
+                e.printStackTrace();
             }
 
         }

@@ -102,9 +102,9 @@ class PoleServer_handler implements Runnable {
                   pos = data[i*4+2];
                   posDot = data[i*4+3];
 
-                //   System.out.println("server < pole["+i+"]: "+angle+"  "
-                //       +angleDot+"  "+pos+"  "+posDot);
-                  actions[i] = calculate_action(angle, angleDot, pos, posDot);
+                  // System.out.println("---------server < pole["+i+"]: "+angle+"  "
+                   //    +angleDot+"  "+pos+"  "+posDot);
+                  actions[i] = calculate_action(angle, angleDot, pos, posDot, i);
                 }
 
                 sendMessage_doubleArray(actions);
@@ -147,6 +147,7 @@ class PoleServer_handler implements Runnable {
 
     }
   
+
     double kp = 1.00, ki = 0.01, kd = 0.2;
     PID anglePid = new PID(kp, ki, kd);
 
@@ -156,32 +157,39 @@ class PoleServer_handler implements Runnable {
         posPid.setTarget(2.0);
     }
 
+    
+    PID followPid = new PID(0.03, 0.0005, 0.07);
+
+    double leadPos = 0.;
 
     // Calculate the actions to be applied to the inverted pendulum from the
     // sensing data.
     // TODO: Current implementation assumes that each pole is controlled
     // independently. The interface needs to be changed if the control of one
     // pendulum needs sensing data from other pendulums.
-    double calculate_action(double angle, double angleDot, double pos, double posDot) {
+    double calculate_action(double angle, double angleDot, double pos, double posDot, int pole) {
         double action = 0;
-        
-	if (pos > 1.8 ) {
-        anglePid.step(angle, angleDot);
-        action = anglePid.calculate();
+      //System.out.println("Pole " + pole + " position is " + pos + "\n"); 
+      if (pole == 1) {
+	      leadPos = pos - 1.1;
 
-        posPid.step(pos, posDot);
-        action += posPid.calculate();
+	        anglePid.step(angle, angleDot);
+      	        action = anglePid.calculate();
 
+               	posPid.step(pos, posDot);
+                action += posPid.calculate();
+       } else {
+	       followPid.setTarget(leadPos);
+
+                anglePid.step(angle, angleDot);
+                action = anglePid.calculate();
+		
+		followPid.step(pos, posDot);
+		action += followPid.calculate();
+       
+       }
 
         System.out.println("Action is ----- " + action + "\n");
-	}else {
-		anglePid.step(angle, angleDot);
-        	action = anglePid.calculate();
-
-        	posPid.step((pos + 2), posDot);
-        	action += posPid.calculate();
-	}
-	
 	return action;
    }
 

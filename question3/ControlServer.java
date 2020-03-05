@@ -34,7 +34,7 @@ public class ControlServer {
  */
 class PoleServer_handler implements Runnable {
     // Set the number of poles
-    private static final int NUM_POLES = 1;
+    private static final int NUM_POLES = 2;
 
     static ServerSocket providerSocket;
     Socket connection = null;
@@ -71,7 +71,7 @@ class PoleServer_handler implements Runnable {
     void control_pendulum(ObjectOutputStream out, ObjectInputStream in) {
         try {
             while(true){
-                System.out.println("-----------------");
+                // System.out.println("-----------------");
 
                 // read data from client
                 Object obj = in.readObject();
@@ -102,8 +102,8 @@ class PoleServer_handler implements Runnable {
                   pos = data[i*4+2];
                   posDot = data[i*4+3];
 
-                  System.out.println("server < pole["+i+"]: "+angle+"  "
-                      +angleDot+"  "+pos+"  "+posDot);
+                //   System.out.println("server < pole["+i+"]: "+angle+"  "
+                //       +angleDot+"  "+pos+"  "+posDot);
                   actions[i] = calculate_action(angle, angleDot, pos, posDot);
                 }
 
@@ -147,7 +147,15 @@ class PoleServer_handler implements Runnable {
 
     }
   
-    double sum = 0.0;
+    double kp = 1.00, ki = 0.01, kd = 0.2;
+    PID anglePid = new PID(kp, ki, kd);
+
+
+    PID posPid = new PID(0.03, 0.0005, 0.07);
+    {
+        posPid.setTarget(2.0);
+    }
+
 
     // Calculate the actions to be applied to the inverted pendulum from the
     // sensing data.
@@ -155,27 +163,26 @@ class PoleServer_handler implements Runnable {
     // independently. The interface needs to be changed if the control of one
     // pendulum needs sensing data from other pendulums.
     double calculate_action(double angle, double angleDot, double pos, double posDot) {
-      double action = 0;
-      double degree = (angle) * (180 / Math.PI);
-      System.out.println("This is the angle >>>>>> " + degree + "\n");
-      System.out.println("This is the angledot >>>>>> " + angleDot + "\n");
-      System.out.println("This is the pos >>>>>> " + pos + "\n");
-      System.out.println("This is the posDot >>>>>> " + posDot + "\n");
-      double kpos = -0.0275;
-      double kposdot = 0.8931;
-      double kangle = -0.0138;
-      double kangledot = 0.4487;
-      double Upos = 0.0;
-      action = -1 * ((kpos * pos) + (kposdot * posDot) + (kangle * angle) + (kangledot * angleDot));
-      sum += action;
-      System.out.println("The Summation is ----------------------------- " + sum + "\n");
-       if ((action > 0) && (angle < 0)) {
-           action = -1 * action;
-       } else if ((action < 0) && (angle > 0)) {
-           action = -1 * action;
-       }
-       
-       return action;
+        double action = 0;
+        
+	if (pos > 1.8 ) {
+        anglePid.step(angle, angleDot);
+        action = anglePid.calculate();
+
+        posPid.step(pos, posDot);
+        action += posPid.calculate();
+
+
+        System.out.println("Action is ----- " + action + "\n");
+	}else {
+		anglePid.step(angle, angleDot);
+        	action = anglePid.calculate();
+
+        	posPid.step((pos + 2), posDot);
+        	action += posPid.calculate();
+	}
+	
+	return action;
    }
 
     /**
@@ -186,7 +193,7 @@ class PoleServer_handler implements Runnable {
         try {
             out.writeDouble(msg);
             out.flush();
-            System.out.println("server>" + msg);
+            // System.out.println("server>" + msg);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -200,11 +207,11 @@ class PoleServer_handler implements Runnable {
             out.writeObject(data);
             out.flush();
 
-            System.out.print("server> ");
+            //System.out.print("server> ");
             for(int i=0; i< data.length; i++){
-                System.out.print(data[i] + "  ");
+                // System.out.print(data[i] + "  ");
             }
-            System.out.println();
+            // System.out.println();
 
         } catch (IOException ioException) {
             ioException.printStackTrace();
